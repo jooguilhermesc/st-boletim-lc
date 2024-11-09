@@ -1,0 +1,9 @@
+*pem
+*txt
+*ipynb
+*pyc
+.env
+/app
+/csv
+/wheels
+/rascunho
