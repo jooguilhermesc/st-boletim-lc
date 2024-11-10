@@ -1,9 +1,7 @@
 *pem
-*txt
-*ipynb
 *pyc
-.env
-/app
-/csv
-/wheels
-/rascunho
+*.env
+streamlit/app
+streamlit/csv
+streamlit/wheels
+streamlit/rascunho
