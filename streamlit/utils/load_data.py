@@ -45,7 +45,7 @@ class getData:
         self.file_format = file_format
         self.write_mode = write_mode
         # Prefixo do caminho no S3, usado para listar e acessar arquivos
-        self.prefix = f"{self.final_layer}/{self.area}/{self.context}/{self.dt_load}/{self.file_name}"
+        self.prefix = f"{self.final_layer}/{self.area}/{self.context}/{self.file_name}"
 
     def list_parquet_files(self):
         """

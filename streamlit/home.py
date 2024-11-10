@@ -2,6 +2,7 @@ from utils.load_data import getData
 from datetime import datetime
 from st_keyup import st_keyup
 import streamlit as st
+import pandas as pd
 import time
 
 # Define a data de carregamento no formato YYYYMMDD
@@ -17,8 +18,20 @@ file_format = "parquet"
 write_mode = "overwrite"
 
 # Instancia a classe getData e baixa os dados do S3 em um DataFrame
-data_from_s3 = getData(layer, final_layer, area, context, file_name, file_format, write_mode)
-df = data_from_s3.download_parquet_files()
+try:
+    data_from_s3 = getData(layer, final_layer, area, context, file_name, file_format, write_mode)
+    df = data_from_s3.download_parquet_files()
+except ValueError:
+    df = pd.DataFrame([{"titulo_acordao":"Sem título",
+                        "colegiado_acordao":"Desconhecido",
+                        "enunciado_acordao":"Desconhecido",
+                        "numero_acordao":"Desconhecido",
+                        "infos_acordao":"",
+                        "tipo_acordao":"Desconhecido",
+                        "relator_acordao":"Desconhecido",
+                        "ano_acordao":"1900",
+                        "tipo_relator_acordao":"Desconhecido"}])  # Cria um DataFrame vazio em caso de erro
+    print("")
 
 @st.cache_data
 def get_data(df):
@@ -31,7 +44,6 @@ def get_data(df):
     Retorna:
         pandas.DataFrame: DataFrame cacheado para uso no aplicativo Streamlit.
     """
-    print(df)
     return df
 
 # Exibe uma mensagem de carregamento enquanto os dados são processados

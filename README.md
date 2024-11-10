@@ -6,6 +6,8 @@ Este projeto é uma aplicação em Streamlit que consome dados da camada `busine
 
 O processo de ETL (Extract, Transform, Load) é responsável por extrair, transformar e carregar os dados da jurisprudência do TCU no Data Lake. A estrutura do ETL é organizada nas camadas `raw`, `trusted` e `business`, para facilitar o processamento e organização dos dados.
 
+![Arquitetura](streamlit\assets\arquitetura.png)
+
 ### Etapas do Processo ETL
 
 1. **Extract (Extração)**: Uma função AWS Lambda baixa o arquivo CSV do site do TCU e o armazena na camada `raw` do S3.
