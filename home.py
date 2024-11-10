@@ -1,10 +1,13 @@
-from utils.load_data import getDataFrame
+from utils.load_data import getData
 from datetime import datetime
 from st_keyup import st_keyup
 import streamlit as st
 import time
 
+# Define a data de carregamento no formato YYYYMMDD
 dt_load = datetime.today().strftime('%Y%m%d')
+
+# Parâmetros de configuração para acessar os dados no S3
 layer = "raw"
 final_layer = "business"
 area = "tcu"
@@ -12,56 +15,77 @@ context = "boletim-informativo-lc"
 file_name = "boletim-informativo-lc"
 file_format = "parquet"
 write_mode = "overwrite"
-data_from_s3 = getDataFrame(layer, final_layer, area, context, file_name, file_format, write_mode)
-df = data_from_s3.baixar_arquivo_parquet()
+
+# Instancia a classe getData e baixa os dados do S3 em um DataFrame
+data_from_s3 = getData(layer, final_layer, area, context, file_name, file_format, write_mode)
+df = data_from_s3.download_parquet_files()
 
 @st.cache_data
 def get_data(df):
+    """
+    Cacheia o DataFrame para evitar recarregamentos desnecessários durante a interação do usuário.
+
+    Parâmetros:
+        df (pandas.DataFrame): DataFrame contendo os dados baixados.
+
+    Retorna:
+        pandas.DataFrame: DataFrame cacheado para uso no aplicativo Streamlit.
+    """
     print(df)
     return df
 
+# Exibe uma mensagem de carregamento enquanto os dados são processados
 with st.spinner('Carregando lista de processos monitorados...'):
-    time.sleep(1)
+    time.sleep(1)  # Simula o tempo de carregamento para feedback ao usuário
 
+# Carrega o DataFrame cacheado
 df = get_data(df)
 
+# Título principal do aplicativo Streamlit
 st.title("Boletim Informativo TCU - Licitações e Contratos")
 
+# Criação de três colunas para filtros de dados
 col1, col2, col3 = st.columns(3)
 
+# Inicializa o DataFrame que será filtrado de acordo com as seleções do usuário
 filtered = df
 
+# Filtro multisseleção para 'Relator' dos acórdãos
 relator = col1.multiselect(
     'Relator',
     filtered["relator_acordao"].unique())
 
+# Filtro multisseleção para 'Colegiado' dos acórdãos
 colegiado = col2.multiselect(
     'Colegiado',
     filtered["colegiado_acordao"].unique())
 
+# Filtro multisseleção para 'Tipo' dos acórdãos
 tipo = col3.multiselect(
     'Tipo',
     filtered["tipo_acordao"].unique())
 
+# Campo de busca para localizar palavras-chave no conteúdo dos acórdãos
 busca = st_keyup("Faça uma busca na base de acórdãos", key="0")
 
-# Filtro de 'relator_acordao'
+# Aplica o filtro 'Relator' se uma seleção for feita
 if relator:
     filtered = filtered[filtered['relator_acordao'].isin(relator)]
 
-# Filtro de 'colegiado_acordao'
+# Aplica o filtro 'Colegiado' se uma seleção for feita
 if colegiado:
     filtered = filtered[filtered['colegiado_acordao'].isin(colegiado)]
 
-# Filtro de 'tipo_acordao'
+# Aplica o filtro 'Tipo' se uma seleção for feita
 if tipo:
     filtered = filtered[filtered['tipo_acordao'].isin(tipo)]
 
+# Aplica o filtro de busca no conteúdo dos acórdãos, ignorando maiúsculas e minúsculas
 if busca:
-    filtered = filtered[filtered.infos_acordao.str.lower().str.contains(busca.lower(),na=False)]
+    filtered = filtered[filtered.infos_acordao.str.lower().str.contains(busca.lower(), na=False)]
 
-
-st.dataframe(filtered,column_config={
+# Exibe o DataFrame filtrado com configuração de colunas personalizada
+st.dataframe(filtered, column_config={
     "titulo_acordao": st.column_config.TextColumn(
         "Título do Acordão",
         help="Título do Acordão",
